@@ -4,6 +4,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.ui.Model;
 import org.springframework.validation.BeanPropertyBindingResult;
 import org.springframework.validation.BindingResult;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import ru.kata.spring.boot_security.demo.models.User;
 import ru.kata.spring.boot_security.demo.util.DataValidator;
 import ru.kata.spring.boot_security.demo.util.UserValidator;
@@ -27,7 +28,7 @@ public class UserDataValidationService {
         this.dataValidator = dataValidator;
     }
 
-    public String validateUserData(User user, List<String> role, Model model) {
+    public String validateUserData(User user, List<String> role) {
         BindingResult userBindingResult = new BeanPropertyBindingResult(user, "user");
         BindingResult roleBindingResult = new BeanPropertyBindingResult(role, "role");
 
@@ -39,12 +40,6 @@ public class UserDataValidationService {
         dataValidator.validate(userBindingResult);
         dataValidator.validate(roleBindingResult);
 
-        String allErrors = dataValidator.getAllErrorsAsString();
-
-        if (!allErrors.isEmpty()) {
-            model.addAttribute("allErrors", allErrors);
-        }
-
-        return allErrors;
+        return dataValidator.getAllErrorsAsString();
     }
 }
