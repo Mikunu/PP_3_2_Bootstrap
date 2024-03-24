@@ -4,22 +4,20 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import ru.kata.spring.boot_security.demo.models.User;
 import ru.kata.spring.boot_security.demo.services.AdminService;
 import ru.kata.spring.boot_security.demo.services.UserDataValidationService;
 import ru.kata.spring.boot_security.demo.util.DataValidator;
+
 import javax.validation.Valid;
 import java.security.Principal;
 import java.util.List;
 
-import org.apache.logging.log4j.Logger;
-import org.apache.logging.log4j.LogManager;
 
 @Controller
 @RequestMapping("/admin")
 public class AdminController {
-
-    private static final Logger LOGGER = LogManager.getLogger(AdminController.class.getName());
 
     private final AdminService adminService;
     private final DataValidator dataValidator;
@@ -56,12 +54,13 @@ public class AdminController {
     @PostMapping("")
     public String createUser(@ModelAttribute @Valid User user,
                              @RequestParam(value = "roles", required = false)
-                             @Valid List<String> roles,
-                             Model model) {
+                             List<String> roles,
+                             RedirectAttributes redirectAttributes) {
 
-        String allErrors = userDataValidationService.validateUserData(user, roles, model);
+        String allErrors = userDataValidationService.validateUserData(user, roles);
 
         if (!allErrors.isEmpty()) {
+            redirectAttributes.addFlashAttribute("errorValidation", allErrors);
             return "redirect:/admin";
         }
         adminService.create(user, roles);
@@ -72,12 +71,12 @@ public class AdminController {
     @PostMapping("/user/edit")
     public String update(@ModelAttribute("person") @Valid User user,
                          @RequestParam(value = "role", required = false) @Valid List<String> role,
-                         Model model) {
+                         RedirectAttributes redirectAttributes) {
 
-        LOGGER.info(user.getPassword());
-        String allErrors = userDataValidationService.validateUserData(user, role, model);
+        String allErrors = userDataValidationService.validateUserData(user, role);
 
         if (!allErrors.isEmpty()) {
+            redirectAttributes.addFlashAttribute("errorValidation", allErrors);
             return "redirect:/admin";
         }
 
